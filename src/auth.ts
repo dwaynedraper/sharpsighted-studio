@@ -132,7 +132,7 @@ export const authConfig: NextAuthConfig = {
                         session.user.id = user.id
                         session.user.role = userData.role
                         session.user.displayName = userData.displayName
-                        session.user.onboardingComplete = userData.onboarding.isComplete
+                        session.user.onboardingComplete = userData.onboarding?.isComplete ?? false
                     }
                 }
             } catch (e) {

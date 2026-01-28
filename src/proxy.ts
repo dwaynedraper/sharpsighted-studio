@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { getToken } from 'next-auth/jwt'
+import { auth } from '@/auth'
 
 const publicExact = ['/', '/login', '/signup', '/verify', '/legal/privacy', '/legal/terms']
-const publicPrefixes: string[] = [] // add later only if needed
+const publicPrefixes: string[] = []
+
+const authRoutes = ['/login', '/signup']
 
 const preOnboardingExact = ['/onboarding', '/account']
-const authRoutes = ['/login', '/signup']
+
+const adminPrefixes = ['/dashboard']
 
 function isPublicPath(pathname: string) {
     if (publicExact.includes(pathname)) return true
@@ -25,10 +28,14 @@ function defaultAuthedLanding(role: unknown) {
     return isAdminRole(role) ? '/dashboard' : '/'
 }
 
-export default async function proxy(request: NextRequest) {
+function isAdminPath(pathname: string) {
+    return adminPrefixes.some((p) => pathname === p || pathname.startsWith(p + '/'))
+}
+
+export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl
 
-    // 1) Always bypass Next internals and all API routes
+    // 1) Bypass Next internals + API routes
     if (
         pathname.startsWith('/_next/') ||
         pathname === '/favicon.ico' ||
@@ -37,28 +44,23 @@ export default async function proxy(request: NextRequest) {
         return NextResponse.next()
     }
 
-    // 2) Read auth token
-    const token = await getToken({
-        req: request,
-        secret: process.env.AUTH_SECRET,
-    })
-
-    const isAuthenticated = !!token
-    const role = (token as any)?.role
-    const onboardingComplete = (token as any)?.onboardingComplete ?? false
+    // 2) Session (server-side)
+    const session = await auth()
+    const isAuthenticated = !!session?.user
+    const role = session?.user?.role
+    const onboardingComplete = session?.user?.onboardingComplete ?? false
 
     // 3) If logged in, block auth pages (send to correct landing)
     if (isAuthenticated && authRoutes.includes(pathname)) {
         return NextResponse.redirect(new URL(defaultAuthedLanding(role), request.url))
     }
 
-    // 3b) If logged in admin hits "/", send them to "/dashboard"
-    if (isAuthenticated && pathname === '/' && isAdminRole(role)) {
-        return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
-
     // 4) Public pages pass through
     if (isPublicPath(pathname)) {
+        // If an admin hits "/", push them to dashboard for your mental model
+        if (isAuthenticated && pathname === '/' && isAdminRole(role)) {
+            return NextResponse.redirect(new URL('/dashboard', request.url))
+        }
         return NextResponse.next()
     }
 
@@ -69,13 +71,23 @@ export default async function proxy(request: NextRequest) {
         return NextResponse.redirect(loginUrl)
     }
 
-    // 6) Onboarding gate
+    // 6) Admin area gate
+    if (isAdminPath(pathname)) {
+        // If role exists and is not admin, block.
+        // If role is missing, do NOT assume admin, block to be safe.
+        if (!isAdminRole(role)) {
+            return NextResponse.redirect(new URL('/unauthorized', request.url))
+        }
+        // Allow admins into dashboard even if onboarding is incomplete.
+        return NextResponse.next()
+    }
+
+    // 7) Onboarding gate (non-admin area)
     if (!onboardingComplete) {
         if (isPreOnboardingAllowed(pathname)) return NextResponse.next()
         return NextResponse.redirect(new URL('/onboarding', request.url))
     }
 
-    // 7) All good
     return NextResponse.next()
 }
 
