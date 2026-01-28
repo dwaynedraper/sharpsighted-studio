@@ -63,7 +63,7 @@ export const authConfig: NextAuthConfig = {
     // Cookie configuration for cross-subdomain support
     cookies: {
         sessionToken: {
-            name: `__Secure-next-auth.session-token`,
+            name: isDev ? `next-auth.session-token` : `__Secure-next-auth.session-token`,
             options: {
                 httpOnly: true,
                 sameSite: 'lax',
@@ -73,7 +73,7 @@ export const authConfig: NextAuthConfig = {
             },
         },
         callbackUrl: {
-            name: `__Secure-next-auth.callback-url`,
+            name: isDev ? `next-auth.callback-url` : `__Secure-next-auth.callback-url`,
             options: {
                 httpOnly: true,
                 sameSite: 'lax',
@@ -83,12 +83,17 @@ export const authConfig: NextAuthConfig = {
             },
         },
         csrfToken: {
-            name: `__Host-next-auth.csrf-token`,
+            name: isDev ? `next-auth.csrf-token` : `__Host-next-auth.csrf-token`,
             options: {
                 httpOnly: true,
                 sameSite: 'lax',
                 path: '/',
-                secure: !isDev,
+                // IMPORTANT:
+                // - Do NOT set domain for csrf in production if using __Host-
+                // - Keep secure true in production
+                ...(isDev
+                    ? { secure: false, domain: cookieDomain }
+                    : { secure: true }),
             },
         },
     },
@@ -100,39 +105,44 @@ export const authConfig: NextAuthConfig = {
     },
 
     callbacks: {
-        async signIn({ user, account, profile }) {
-            // Log sign-in event
-            if (user.id && account) {
-                await createAuditLog({
-                    actorUserId: user.id,
-                    actorRole: 'user',
-                    action: account.provider === 'google' ? 'LOGIN_GOOGLE' : 'LOGIN_EMAIL',
-                    entityType: 'user',
-                    entityId: user.id,
-                    metadata: {
-                        provider: account.provider,
-                    },
-                });
+        async signIn({ user, account }) {
+            try {
+                if (user?.id && account) {
+                    await createAuditLog({
+                        actorUserId: user.id,
+                        actorRole: 'user',
+                        action: account.provider === 'google' ? 'LOGIN_GOOGLE' : 'LOGIN_EMAIL',
+                        entityType: 'user',
+                        entityId: user.id,
+                        metadata: {
+                            provider: account.provider,
+                        },
+                    })
+                }
+            } catch (e) {
+                console.error("[auth] signIn side-effect failed", e)
+                // never deny login for audit failures
             }
-
-            return true;
+            return true
         },
 
         async session({ session, user }) {
-            // Fetch fresh user data to include custom fields
-            if (user.id) {
-                const userData = await getUserById(user.id);
-
-                if (userData) {
-                    session.user.id = user.id;
-                    session.user.role = userData.role;
-                    session.user.displayName = userData.displayName;
-                    session.user.onboardingComplete = userData.onboarding.isComplete;
+            try {
+                if (user?.id) {
+                    const userData = await getUserById(user.id)
+                    if (userData) {
+                        session.user.id = user.id
+                        session.user.role = userData.role
+                        session.user.displayName = userData.displayName
+                        session.user.onboardingComplete = userData.onboarding.isComplete
+                    }
                 }
+            } catch (e) {
+                console.error("[auth] session enrichment failed", e)
+                // return session anyway
             }
-
-            return session;
-        },
+            return session
+        }
     },
 
     events: {
