@@ -4,6 +4,7 @@ import { Space_Grotesk } from 'next/font/google';
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AccentProvider } from "@/components/providers/AccentProvider";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 import { getThemeFromHeaders, getAccentFromHeaders } from "@/lib/theme/cookie-utils";
 import { MainShell } from "@/components/main/MainShell";
 import { RosShell } from "@/components/ros/RosShell";
@@ -68,11 +69,13 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <ThemeProvider initialTheme={initialTheme}>
-          <AccentProvider initialAccent={initialAccent}>
-            <Shell>{children}</Shell>
-          </AccentProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider initialTheme={initialTheme}>
+            <AccentProvider initialAccent={initialAccent}>
+              <Shell>{children}</Shell>
+            </AccentProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -68,8 +68,8 @@ export function AccentPicker() {
                                                 setIsOpen(false);
                                             }}
                                             className={`group relative flex items-center gap-3 p-2 border rounded-[3px] transition-all text-left h-12 overflow-hidden ${isSelected
-                                                    ? 'border-neutral-900 dark:border-neutral-100 bg-neutral-50 dark:bg-neutral-800/50 shadow-sm'
-                                                    : 'border-neutral-200/50 dark:border-neutral-700/50 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 hover:border-neutral-300 dark:hover:border-neutral-600'
+                                                ? 'border-neutral-900 dark:border-neutral-100 bg-neutral-50 dark:bg-neutral-800/50 shadow-sm'
+                                                : 'border-neutral-200/50 dark:border-neutral-700/50 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 hover:border-neutral-300 dark:hover:border-neutral-600'
                                                 }`}
                                             aria-label={`Select ${color.name} accent`}
                                             aria-current={isSelected}
