@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { AccentPicker } from '@/components/ui/AccentPicker';
+import { AuthButton } from '@/components/auth/AuthButton';
 
 const navigation = [
     { name: 'HOME', href: '/' },
@@ -49,8 +50,9 @@ export function RosNav() {
                         })}
                     </div>
 
-                    {/* Theme Controls */}
+                    {/* Theme Controls & Auth */}
                     <div className="flex items-center gap-2">
+                        <AuthButton variant="ros" />
                         <ThemeToggle />
                         <AccentPicker />
                     </div>
