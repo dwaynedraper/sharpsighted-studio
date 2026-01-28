@@ -63,7 +63,7 @@ export const authConfig: NextAuthConfig = {
     // Cookie configuration for cross-subdomain support
     cookies: {
         sessionToken: {
-            name: `__Secure-next-auth.session-token`,
+            name: isDev ? `next-auth.session-token` : `__Secure-next-auth.session-token`,
             options: {
                 httpOnly: true,
                 sameSite: 'lax',
@@ -73,7 +73,7 @@ export const authConfig: NextAuthConfig = {
             },
         },
         callbackUrl: {
-            name: `__Secure-next-auth.callback-url`,
+            name: isDev ? `next-auth.callback-url` : `__Secure-next-auth.callback-url`,
             options: {
                 httpOnly: true,
                 sameSite: 'lax',
@@ -83,12 +83,17 @@ export const authConfig: NextAuthConfig = {
             },
         },
         csrfToken: {
-            name: `__Host-next-auth.csrf-token`,
+            name: isDev ? `next-auth.csrf-token` : `__Host-next-auth.csrf-token`,
             options: {
                 httpOnly: true,
                 sameSite: 'lax',
                 path: '/',
-                secure: !isDev,
+                // IMPORTANT:
+                // - Do NOT set domain for csrf in production if using __Host-
+                // - Keep secure true in production
+                ...(isDev
+                    ? { secure: false, domain: cookieDomain }
+                    : { secure: true }),
             },
         },
     },

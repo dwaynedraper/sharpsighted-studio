@@ -1,30 +1,39 @@
 #!/usr/bin/env node
-
-/**
- * MongoDB Setup Script
- * 
- * This script creates the required indexes for the Sharp Sighted Studio application.
- * Run this once after setting up your MongoDB database.
- * 
- * Usage:
- *   node scripts/setup-db.js
- *   or
- *   npm run setup-db
- */
-
-const { createIndexes } = require('../src/lib/db/indexes');
+const { MongoClient } = require("mongodb");
 
 async function setup() {
-    console.log('🚀 Starting database setup...\n');
+    console.log("🚀 Starting database setup...\n");
 
-    try {
-        await createIndexes();
-        console.log('\n✅ Database setup complete!');
-        process.exit(0);
-    } catch (error) {
-        console.error('\n❌ Database setup failed:', error);
-        process.exit(1);
-    }
+    const uri = process.env.MONGODB_URI;
+    if (!uri) throw new Error("Missing MONGODB_URI in environment");
+
+    const client = new MongoClient(uri);
+    await client.connect();
+
+    const db = client.db();
+    const users = db.collection("users");
+
+    await users.createIndex({ email: 1 }, { unique: true });
+
+    await users.createIndex(
+        { displayNameLower: 1 },
+        {
+            unique: true,
+            partialFilterExpression: {
+                displayNameLower: { $exists: true, $type: "string" }
+            }
+        }
+    );
+
+    console.log("✅ Indexes ensured:");
+    console.log("- users.email unique");
+    console.log("- users.displayNameLower unique (partial)");
+
+    await client.close();
+    console.log("\n✅ Database setup complete!");
 }
 
-setup();
+setup().catch((error) => {
+    console.error("\n❌ Database setup failed:", error);
+    process.exit(1);
+});
