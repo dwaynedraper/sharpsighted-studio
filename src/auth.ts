@@ -105,39 +105,44 @@ export const authConfig: NextAuthConfig = {
     },
 
     callbacks: {
-        async signIn({ user, account, profile }) {
-            // Log sign-in event
-            if (user.id && account) {
-                await createAuditLog({
-                    actorUserId: user.id,
-                    actorRole: 'user',
-                    action: account.provider === 'google' ? 'LOGIN_GOOGLE' : 'LOGIN_EMAIL',
-                    entityType: 'user',
-                    entityId: user.id,
-                    metadata: {
-                        provider: account.provider,
-                    },
-                });
+        async signIn({ user, account }) {
+            try {
+                if (user?.id && account) {
+                    await createAuditLog({
+                        actorUserId: user.id,
+                        actorRole: 'user',
+                        action: account.provider === 'google' ? 'LOGIN_GOOGLE' : 'LOGIN_EMAIL',
+                        entityType: 'user',
+                        entityId: user.id,
+                        metadata: {
+                            provider: account.provider,
+                        },
+                    })
+                }
+            } catch (e) {
+                console.error("[auth] signIn side-effect failed", e)
+                // never deny login for audit failures
             }
-
-            return true;
+            return true
         },
 
         async session({ session, user }) {
-            // Fetch fresh user data to include custom fields
-            if (user.id) {
-                const userData = await getUserById(user.id);
-
-                if (userData) {
-                    session.user.id = user.id;
-                    session.user.role = userData.role;
-                    session.user.displayName = userData.displayName;
-                    session.user.onboardingComplete = userData.onboarding.isComplete;
+            try {
+                if (user?.id) {
+                    const userData = await getUserById(user.id)
+                    if (userData) {
+                        session.user.id = user.id
+                        session.user.role = userData.role
+                        session.user.displayName = userData.displayName
+                        session.user.onboardingComplete = userData.onboarding.isComplete
+                    }
                 }
+            } catch (e) {
+                console.error("[auth] session enrichment failed", e)
+                // return session anyway
             }
-
-            return session;
-        },
+            return session
+        }
     },
 
     events: {
