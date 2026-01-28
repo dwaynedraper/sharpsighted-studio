@@ -4,9 +4,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   allowedDevOrigins: [
-    'http://sharpsighted.local:3001',
-    'http://ros.sharpsighted.local:3001',
-    'http://localhost:3001',
+    'sharpsighted.local:3001',
+    'ros.sharpsighted.local:3001',
+    'localhost:3001',
   ],
 };
 
