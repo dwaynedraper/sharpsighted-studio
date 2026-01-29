@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getDb } from "@/lib/db/mongodb";
+import { RoleSelect } from "./RoleSelect";
 
 type UserRow = {
     _id: any;
@@ -29,6 +30,7 @@ export default async function DashboardUsersPage() {
 
     const role = session.user.role;
     const isAdmin = role === "admin" || role === "superAdmin";
+    const isSuperAdmin = role === "superAdmin";
     if (!isAdmin) redirect("/unauthorized");
 
     const db = await getDb();
@@ -77,7 +79,15 @@ export default async function DashboardUsersPage() {
                                     {u.email ?? ""}
                                 </td>
                                 <td style={{ borderBottom: "1px solid rgba(0,0,0,0.08)", padding: "8px 6px" }}>
-                                    {u.role ?? ""}
+                                    {isSuperAdmin ? (
+                                        <RoleSelect
+                                            userId={String(u._id)}
+                                            currentRole={u.role ?? "user"}
+                                            userEmail={u.email ?? ""}
+                                        />
+                                    ) : (
+                                        u.role ?? ""
+                                    )}
                                 </td>
                                 <td style={{ borderBottom: "1px solid rgba(0,0,0,0.08)", padding: "8px 6px" }}>
                                     {u.status?.isActive ? "yes" : "no"}
