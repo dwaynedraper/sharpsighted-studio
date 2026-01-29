@@ -7,7 +7,8 @@ If an auth-related implementation conflicts with this doc, stop and ask for a de
 - Use Auth.js (NextAuth v5) with MongoDB adapter.
 - Providers:
   - Email magic link (required)
-  - Google OAuth (required)
+  - Google OAuth (required in staging + production, optional in local dev)
+  - Local development: email magic link only (output to console)
 - Credentials password login is optional and not required for launch.
   - If credentials are not used, do not implement forgot/reset password routes.
 
@@ -105,6 +106,7 @@ Use both:
 
 Rules:
 - All admin routes must be protected before render.
+- Admin routes begin with `/dashboard`
 - All vote submission endpoints must validate:
   - authenticated
   - onboarding complete

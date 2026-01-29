@@ -55,18 +55,18 @@ If a route is not listed here, it must not be created without updating this file
   - Display name change (if unlocked and available)
 
 ### Admin
-- `/admin` Admin dashboard home
-- `/admin/content`
+- `/dashboard` Admin dashboard home
+- `/dashboard/content`
   - Drafts list: posts, episodes, votes
-- `/admin/content/new`
+- `/dashboard/content/new`
   - Create new post, episode, or vote
-- `/admin/content/[id]`
+- `/dashboard/content/[id]`
   - Edit and preview draft
 
 ### SuperAdmin
-- `/admin/users`
+- `/dashboard/users`
   - User and admin management
-- `/admin/users/new-admin`
+- `/dashboard/users/new-admin`
   - Create admin user
 
 ### Auth pages (Public)
@@ -102,14 +102,14 @@ If a route is not listed here, it must not be created without updating this file
   - Display name change (if unlocked and available)
 
 ### Admin
-- `/admin` Admin dashboard home (RoS shell)
-- `/admin/content`
-- `/admin/content/new`
-- `/admin/content/[id]`
+- `/dashboard` Admin dashboard home (RoS shell)
+- `/dashboard/content`
+- `/dashboard/content/new`
+- `/dashboard/content/[id]`
 
 ### SuperAdmin
-- `/admin/users`
-- `/admin/users/new-admin`
+- `/dashboard/users`
+- `/dashboard/users/new-admin`
 
 ### Auth pages (Public)
 - `/login`

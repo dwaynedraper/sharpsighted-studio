@@ -151,3 +151,60 @@ export async function createUser(email: string, emailVerified: boolean = false):
         _id: result.insertedId,
     };
 }
+
+/**
+ * Update user role (superAdmin only)
+ */
+export async function updateUserRole(
+    userId: string,
+    newRole: 'user' | 'admin' | 'superAdmin',
+    actorUserId: string,
+    actorRole: 'user' | 'admin' | 'superAdmin'
+): Promise<void> {
+    const db = await getDb();
+
+    // Get the user to check current role
+    const user = await getUserById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const oldRole = user.role;
+    if (oldRole === newRole) {
+        throw new Error('User already has this role');
+    }
+
+    const now = new Date();
+
+    await db.collection('users').updateOne(
+        { _id: new ObjectId(userId) },
+        {
+            $set: {
+                role: newRole,
+                updatedAt: now,
+            },
+        }
+    );
+
+    // Log ADMIN_CREATED if promoting to admin/superAdmin from user
+    if (oldRole === 'user' && (newRole === 'admin' || newRole === 'superAdmin')) {
+        await createAuditLog({
+            actorUserId,
+            actorRole,
+            action: 'ADMIN_CREATED',
+            entityType: 'user',
+            entityId: userId,
+            metadata: { oldRole, newRole, targetEmail: user.email },
+        });
+    }
+
+    // Always log ROLE_CHANGED
+    await createAuditLog({
+        actorUserId,
+        actorRole,
+        action: 'ROLE_CHANGED',
+        entityType: 'user',
+        entityId: userId,
+        metadata: { oldRole, newRole, targetEmail: user.email },
+    });
+}

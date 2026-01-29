@@ -20,7 +20,7 @@ export function LoginForm() {
         setError('');
 
         try {
-            const result = await signIn('email', {
+            const result = await signIn('nodemailer', {
                 email,
                 callbackUrl,
                 redirect: false,
