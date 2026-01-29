@@ -67,11 +67,11 @@ export function OnboardingForm() {
                 return;
             }
 
-            // Update the session
-            const updated = await update()
+            // Update the session - force JWT refresh by passing data
+            await update({ onboarding: true })
 
             // Redirect to home, or if admin, redirect to dashboard
-            const role = updated?.user?.role
+            const role = session?.user?.role
             const landing = role === 'admin' || role === 'superAdmin' ? '/dashboard' : '/'
             router.push(landing)
             router.refresh()
