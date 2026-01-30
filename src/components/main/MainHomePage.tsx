@@ -2,14 +2,26 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 
 export function MainHomePage() {
     return (
         <main className="min-h-screen pb-16 font-mono text-foreground transition-colors duration-300 selection:bg-[#38bdf8] selection:text-background">
             {/* HERO SECTION */}
-            <section className="relative h-screen flex items-center justify-center mb-32">
-                <div className="absolute inset-0 bg-gradient-to-b from-black via-neutral-900 to-background opacity-50" />
+            <section className="relative h-screen flex items-center justify-center mb-32 overflow-hidden">
+                {/* Fixed Background Layer */}
+                <div className="fixed inset-0 z-0 pointer-events-none">
+                    <Image
+                        src="https://res.cloudinary.com/dyijp1zno/image/upload/v1769450949/Real%20Estate/obscura-odessey--jYPVUm16BY-unsplash_wqkqiv.jpg"
+                        alt="DFW Skyline Background"
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-black/60 z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/40 z-20" />
+                </div>
 
                 <div className="relative z-10 container mx-auto px-4 max-w-4xl text-center pt-20">
                     <motion.h1
@@ -22,9 +34,9 @@ export function MainHomePage() {
                     </motion.h1>
 
                     <div className="space-y-4 text-xl md:text-2xl font-serif text-white/90 leading-relaxed font-light mb-12 border-l-2 border-[#38bdf8] pl-6 text-left inline-block">
-                        <p>You're welcome to watch.</p>
-                        <p>You're welcome to learn.</p>
-                        <p>You're welcome to pick up a camera and join us for the day.</p>
+                        <p>This is where stories are made in the open.</p>
+                        <p>Where learning happens by doing.</p>
+                        <p>Where you can pick up a camera and join us for the day.</p>
                     </div>
 
                     <div className="flex flex-col md:flex-row items-center justify-center gap-6 mt-8">
