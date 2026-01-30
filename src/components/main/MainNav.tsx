@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { AccentPicker } from '@/components/ui/AccentPicker';
@@ -26,9 +27,18 @@ export function MainNav() {
                     <div className="flex-shrink-0">
                         <Link
                             href="/"
-                            className="text-xl font-bold font-[var(--font-display)] tracking-tight gradient-text-blue hover:glow-hover transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 rounded px-2 py-1"
+                            className="flex items-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 rounded px-2 py-1"
                         >
-                            Sharp Sighted
+                            <Image
+                                src="/images/Sharp Sighted Blue Iris.png"
+                                alt="Sharp Sighted Logo"
+                                width={32}
+                                height={32}
+                                className="transition-transform group-hover:scale-110"
+                            />
+                            <span className="text-lg font-semibold tracking-tight uppercase" style={{ fontFamily: 'var(--font-logo)' }}>
+                                Sharp Sighted Studio
+                            </span>
                         </Link>
                     </div>
 
