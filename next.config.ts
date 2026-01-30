@@ -8,6 +8,15 @@ const nextConfig: NextConfig = {
     'sharpsighted.local',
     '*.sharpsighted.local',
   ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

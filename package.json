@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.1",
+    "cloudinary": "^2.9.0",
     "dotenv": "^17.2.3",
     "framer-motion": "^12.29.2",
     "js-cookie": "^3.0.5",
@@ -18,9 +19,11 @@
     "mongodb": "^6.21.0",
     "next": "16.1.5",
     "next-auth": "^5.0.0-beta.30",
+    "next-cloudinary": "^6.17.5",
     "nodemailer": "^7.0.13",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "sass": "^1.97.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

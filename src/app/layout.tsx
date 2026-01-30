@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Space_Grotesk } from 'next/font/google';
-import "./globals.css";
+import "./globals.scss";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AccentProvider } from "@/components/providers/AccentProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";

@@ -102,10 +102,10 @@ export function MainHomePage() {
                             </div>
 
                             <div className="mt-8 flex flex-wrap gap-4">
-                                <button className="px-6 py-3 bg-surface glow-box-blue hover:glow-box-blue text-foreground font-semibold text-sm uppercase tracking-wide transition-all">
+                                <button className="px-6 py-3 bg-surface glow-blue hover:glow-blue text-foreground font-semibold text-sm uppercase tracking-wide transition-all">
                                     Read the Latest Article
                                 </button>
-                                <button className="px-6 py-3 bg-surface glow-box-pink hover:glow-box-pink text-foreground font-semibold text-sm uppercase tracking-wide transition-all">
+                                <button className="px-6 py-3 bg-surface glow-pink hover:glow-pink text-foreground font-semibold text-sm uppercase tracking-wide transition-all">
                                     Join the Discord
                                 </button>
                             </div>
@@ -173,7 +173,7 @@ export function MainHomePage() {
                             <p>If you join for Ripped or Stamped, you become part of the crew.</p>
                             <p>You get a front-row seat to the pressure, the mistakes, and the struggle.</p>
 
-                            <div className="border-l-4 border-[#38bdf8] pl-6 py-4 bg-foreground/5 italic font-serif text-lg space-y-4 glow-box-blue">
+                            <div className="border-l-4 border-[#38bdf8] pl-6 py-4 bg-foreground/5 italic font-serif text-lg space-y-4 glow-blue">
                                 <p>I need a few masochists.</p>
                                 <p>People who will answer honestly.</p>
                                 <p>Even if the honest answer means it's a rip.</p>
@@ -220,13 +220,13 @@ export function MainHomePage() {
                     </div>
 
                     <div className="grid grid-cols-3 gap-6 mt-16 max-w-3xl mx-auto">
-                        <div className="aspect-square bg-surface glow-box-blue rounded-sm flex items-center justify-center text-foreground/40 text-xs text-center p-4">
+                        <div className="aspect-square bg-surface glow-blue rounded-sm flex items-center justify-center text-foreground/40 text-xs text-center p-4">
                             Camera Gear
                         </div>
-                        <div className="aspect-square bg-surface glow-box-blue rounded-sm flex items-center justify-center text-foreground/40 text-xs text-center p-4">
+                        <div className="aspect-square bg-surface glow-blue rounded-sm flex items-center justify-center text-foreground/40 text-xs text-center p-4">
                             Studio Space
                         </div>
-                        <div className="aspect-square bg-surface glow-box-blue rounded-sm flex items-center justify-center text-foreground/40 text-xs text-center p-4">
+                        <div className="aspect-square bg-surface glow-blue rounded-sm flex items-center justify-center text-foreground/40 text-xs text-center p-4">
                             Community
                         </div>
                     </div>
@@ -241,7 +241,7 @@ export function MainHomePage() {
                 <section className="container mx-auto px-4 mb-32 max-w-6xl">
                     <div className="grid md:grid-cols-2 gap-16 items-start">
                         <div className="relative">
-                            <div className="relative aspect-video bg-surface glow-box-pink rounded-sm">
+                            <div className="relative aspect-video bg-surface glow-pink rounded-sm">
                                 <div className="w-full h-full flex items-center justify-center text-foreground/40 text-sm">
                                     [Gallery Wall]
                                 </div>
@@ -259,7 +259,7 @@ export function MainHomePage() {
                         </div>
 
                         <div className="relative mt-12 md:mt-0">
-                            <div className="relative aspect-video bg-surface glow-box-blue rounded-sm">
+                            <div className="relative aspect-video bg-surface glow-blue rounded-sm">
                                 <div className="w-full h-full flex items-center justify-center text-foreground/40 text-sm">
                                     [Episode Page]
                                 </div>
@@ -286,7 +286,7 @@ export function MainHomePage() {
                 {/* WHY THIS EXISTS */}
                 <section className="container mx-auto px-4 mb-32 max-w-5xl">
                     <div className="grid md:grid-cols-2 gap-12 items-center">
-                        <div className="relative aspect-square md:aspect-[3/4] overflow-hidden rounded-sm order-2 md:order-1 bg-surface glow-box-blue">
+                        <div className="relative aspect-square md:aspect-[3/4] overflow-hidden rounded-sm order-2 md:order-1 bg-surface glow-blue">
                             <div className="w-full h-full flex items-center justify-center text-foreground/40 text-sm">
                                 [Founder Portrait]
                             </div>
@@ -296,7 +296,7 @@ export function MainHomePage() {
                             <div className="text-xs font-mono uppercase tracking-[0.3em] opacity-40 mb-8">Why This Exists</div>
                             <h2 className="text-4xl font-serif font-bold mb-8">Most media is made alone. That isolation shows.</h2>
 
-                            <div className="bg-surface glow-box-blue p-8 mb-12 relative">
+                            <div className="bg-surface glow-blue p-8 mb-12 relative">
                                 <p className="font-serif italic text-lg mb-6 leading-relaxed relative z-10">
                                     "I built this because I wanted a place where photographers could work together without posturing. A place where you can struggle out loud, be honest about what you do not know, and still make serious, high-quality work."
                                 </p>
@@ -319,7 +319,7 @@ export function MainHomePage() {
 
                 {/* 10% RULE */}
                 <section className="container mx-auto px-4 mb-32 max-w-3xl text-center">
-                    <div className="inline-block glow-box-pink px-6 py-3 bg-surface">
+                    <div className="inline-block glow-pink px-6 py-3 bg-surface">
                         <h3 className="text-sm font-bold font-mono uppercase tracking-widest mb-2 text-[#38bdf8]">The 10% Rule</h3>
                         <div className="space-y-2">
                             <p className="font-serif text-lg opacity-80">We dedicate 10% of studio time to work that builds people and community.</p>
