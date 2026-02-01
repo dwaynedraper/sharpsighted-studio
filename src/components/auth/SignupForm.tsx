@@ -132,7 +132,7 @@ export function SignupForm() {
             <button
                 onClick={handleGoogleSignup}
                 disabled={isLoading}
-                className="w-full px-6 py-3 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 font-medium rounded hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                className="w-full px-6 py-3 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 font-medium rounded hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
             >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path

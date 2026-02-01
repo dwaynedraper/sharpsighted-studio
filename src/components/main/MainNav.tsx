@@ -67,7 +67,7 @@ export function MainNav() {
                                     <span
                                         className={`relative z-10 ${isActive
                                             ? 'gradient-text'
-                                            : 'text-neutral-700 dark:text-neutral-300 hover:text-[var(--brand-blue)]'
+                                            : 'text-neutral-900 dark:text-neutral-300 hover:text-[var(--brand-blue)]'
                                             }`}
                                     >
                                         {item.name}
@@ -95,7 +95,7 @@ export function MainNav() {
                                 href={item.href}
                                 className={`block px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 ${isActive
                                     ? 'gradient-text bg-gradient-to-r from-[var(--brand-blue)]/10 to-[var(--cerise)]/10'
-                                    : 'text-neutral-700 dark:text-neutral-300 hover:text-[var(--brand-blue)] hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
+                                    : 'text-neutral-900 dark:text-neutral-300 hover:text-[var(--brand-blue)] hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
                                     }`}
                                 aria-current={isActive ? 'page' : undefined}
                             >
