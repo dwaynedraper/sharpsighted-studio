@@ -24,6 +24,10 @@ export interface User {
         theme: 'light' | 'dark' | 'system';
         accent: string;
     };
+    rosStats?: {
+        ballotsCast: number;
+        lastBallotAt: Date | null;
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -207,4 +211,31 @@ export async function updateUserRole(
         entityId: userId,
         metadata: { oldRole, newRole, targetEmail: user.email },
     });
+}
+
+/**
+ * Get user's RoS stats (for eligibility checks)
+ */
+export async function getRosStats(userId: string): Promise<{ ballotsCast: number; lastBallotAt: Date | null }> {
+    const user = await getUserById(userId);
+    return user?.rosStats ?? { ballotsCast: 0, lastBallotAt: null };
+}
+
+/**
+ * Increment user's RoS ballots cast after voting
+ */
+export async function incrementRosBallotsCast(userId: string): Promise<void> {
+    const db = await getDb();
+    const now = new Date();
+
+    await db.collection('users').updateOne(
+        { _id: new ObjectId(userId) },
+        {
+            $inc: { 'rosStats.ballotsCast': 1 },
+            $set: {
+                'rosStats.lastBallotAt': now,
+                updatedAt: now,
+            },
+        }
+    );
 }
