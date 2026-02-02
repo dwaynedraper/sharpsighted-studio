@@ -8,6 +8,7 @@ declare module 'next-auth' {
             role: 'user' | 'admin' | 'superAdmin';
             displayName: string | null;
             onboardingComplete: boolean;
+            image?: string | null;
         } & DefaultSession['user'];
     }
 
@@ -17,6 +18,7 @@ declare module 'next-auth' {
         role: 'user' | 'admin' | 'superAdmin';
         displayName: string | null;
         onboardingComplete: boolean;
+        image?: string | null;
     }
 }
 
@@ -26,5 +28,6 @@ declare module 'next-auth/jwt' {
         role: 'user' | 'admin' | 'superAdmin';
         displayName: string | null;
         onboardingComplete: boolean;
+        image?: string | null;
     }
 }

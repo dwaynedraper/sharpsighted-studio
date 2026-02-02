@@ -1,6 +1,6 @@
 # Site Map and Route Ownership
 
-This document defines all valid routes, which subdomain owns them, and the required access level.  
+This document defines all valid routes, which subdomain owns them, and the required access level.
 If a route is not listed here, it must not be created without updating this file.
 
 ## 1) Subdomains
@@ -11,11 +11,12 @@ If a route is not listed here, it must not be created without updating this file
 - Each subdomain has its own navigation and visual shell.
 - Theme toggle and accent picker appear in the header on both subdomains.
 - User session and identity are shared across subdomains.
-- Access gating levels:
-  - Public
-  - Authenticated
-  - Admin
-  - SuperAdmin
+
+### Access gating levels
+- Public
+- Authenticated
+- Admin
+- SuperAdmin
 
 ### Authorization behavior
 - If a user is not authorized for a route:
@@ -55,18 +56,18 @@ If a route is not listed here, it must not be created without updating this file
   - Display name change (if unlocked and available)
 
 ### Admin
-- `/admin` Admin dashboard home
-- `/admin/content`
+- `/dashboard` Admin dashboard home
+- `/dashboard/content`
   - Drafts list: posts, episodes, votes
-- `/admin/content/new`
+- `/dashboard/content/new`
   - Create new post, episode, or vote
-- `/admin/content/[id]`
+- `/dashboard/content/[id]`
   - Edit and preview draft
 
 ### SuperAdmin
-- `/admin/users`
+- `/dashboard/users`
   - User and admin management
-- `/admin/users/new-admin`
+- `/dashboard/users/new-admin`
   - Create admin user
 
 ### Auth pages (Public)
@@ -85,11 +86,11 @@ If a route is not listed here, it must not be created without updating this file
   - Current episode highlighted
   - Past episodes listed as cards
 - `/challenges/[slug]`
-  - Episode or challenge detail page
+  - Episode detail page (evergreen, beautiful)
 - `/voting`
-  - Active votes
+  - Active votes (interactive)
   - Locked results previews
-  - Peeks at upcoming votes
+  - Most recent episode summary block
 - `/legal/privacy`
 - `/legal/terms`
 
@@ -102,14 +103,17 @@ If a route is not listed here, it must not be created without updating this file
   - Display name change (if unlocked and available)
 
 ### Admin
-- `/admin` Admin dashboard home (RoS shell)
-- `/admin/content`
-- `/admin/content/new`
-- `/admin/content/[id]`
+- `/dashboard` Admin dashboard home (RoS shell)
+- `/dashboard/content`
+  - Drafts list: posts, episodes, votes
+- `/dashboard/content/new`
+  - Create new post, episode, or vote
+- `/dashboard/content/[id]`
+  - Edit and preview draft
 
 ### SuperAdmin
-- `/admin/users`
-- `/admin/users/new-admin`
+- `/dashboard/users`
+- `/dashboard/users/new-admin`
 
 ### Auth pages (Public)
 - `/login`
@@ -134,8 +138,9 @@ If a route is not listed here, it must not be created without updating this file
 - RoS “Challenges” pages are driven by Episode data.
 - Episode pages may include:
   - paper selection outcomes
-  - rubric outcomes
-  - final challenge results
+  - benchmark outcomes
+  - trap outcomes
+  - ridiculous outcome (optional)
   - images and embedded media
 
 ### Voting

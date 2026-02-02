@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Space_Grotesk } from 'next/font/google';
-import "./globals.css";
+import "./globals.scss";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AccentProvider } from "@/components/providers/AccentProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { getThemeFromHeaders, getAccentFromHeaders } from "@/lib/theme/cookie-utils";
 import { MainShell } from "@/components/main/MainShell";
 import { RosShell } from "@/components/ros/RosShell";
+import { SiteFooter } from "@/components/shared/SiteFooter";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -73,6 +74,7 @@ export default async function RootLayout({
           <ThemeProvider initialTheme={initialTheme}>
             <AccentProvider initialAccent={initialAccent}>
               <Shell>{children}</Shell>
+              <SiteFooter />
             </AccentProvider>
           </ThemeProvider>
         </AuthProvider>

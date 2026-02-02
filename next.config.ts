@@ -4,10 +4,19 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   allowedDevOrigins: [
-    'sharpsighted.local:3001',
-    'ros.sharpsighted.local:3001',
-    'localhost:3001',
+    'localhost',
+    'sharpsighted.local',
+    '*.sharpsighted.local',
   ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

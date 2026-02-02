@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { AccentPicker } from '@/components/ui/AccentPicker';
+import { AuthButton } from '@/components/auth/AuthButton';
 import { motion } from 'framer-motion';
 
 const navigation = [
@@ -25,9 +27,18 @@ export function MainNav() {
                     <div className="flex-shrink-0">
                         <Link
                             href="/"
-                            className="text-xl font-bold font-[var(--font-display)] tracking-tight gradient-text-blue hover:glow-hover transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 rounded px-2 py-1"
+                            className="flex items-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 rounded px-2 py-1"
                         >
-                            Sharp Sighted
+                            <Image
+                                src="/images/Sharp Sighted Blue Iris.png"
+                                alt="Sharp Sighted Logo"
+                                width={32}
+                                height={32}
+                                className="transition-transform group-hover:scale-110"
+                            />
+                            <span className="text-lg font-semibold tracking-tight uppercase" style={{ fontFamily: 'var(--font-logo)' }}>
+                                Sharp Sighted Studio
+                            </span>
                         </Link>
                     </div>
 
@@ -56,7 +67,7 @@ export function MainNav() {
                                     <span
                                         className={`relative z-10 ${isActive
                                             ? 'gradient-text'
-                                            : 'text-neutral-700 dark:text-neutral-300 hover:text-[var(--brand-blue)]'
+                                            : 'text-neutral-900 dark:text-neutral-300 hover:text-[var(--brand-blue)]'
                                             }`}
                                     >
                                         {item.name}
@@ -66,8 +77,9 @@ export function MainNav() {
                         })}
                     </div>
 
-                    {/* Theme Controls */}
+                    {/* Theme Controls & Auth */}
                     <div className="flex items-center gap-3">
+                        <AuthButton variant="main" />
                         <ThemeToggle />
                         <AccentPicker />
                     </div>
@@ -83,7 +95,7 @@ export function MainNav() {
                                 href={item.href}
                                 className={`block px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 ${isActive
                                     ? 'gradient-text bg-gradient-to-r from-[var(--brand-blue)]/10 to-[var(--cerise)]/10'
-                                    : 'text-neutral-700 dark:text-neutral-300 hover:text-[var(--brand-blue)] hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
+                                    : 'text-neutral-900 dark:text-neutral-300 hover:text-[var(--brand-blue)] hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
                                     }`}
                                 aria-current={isActive ? 'page' : undefined}
                             >

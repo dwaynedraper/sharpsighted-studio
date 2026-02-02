@@ -1,21 +1,26 @@
-import NextAuth, { type NextAuthConfig } from 'next-auth';
-import { MongoDBAdapter } from '@auth/mongodb-adapter';
-import GoogleProvider from 'next-auth/providers/google';
-import EmailProvider from 'next-auth/providers/email';
-import clientPromise from '@/lib/db/mongodb';
-import { getUserById } from '@/lib/db/user';
-import { createAuditLog } from '@/lib/db/audit';
+import NextAuth, { type NextAuthConfig } from 'next-auth'
+import { MongoDBAdapter } from '@auth/mongodb-adapter'
+import GoogleProvider from 'next-auth/providers/google'
+import DiscordProvider from 'next-auth/providers/discord'
+import NodemailerProvider from 'next-auth/providers/nodemailer'
+import clientPromise from '@/lib/db/mongodb'
+import { getUserById, updateUserImage } from '@/lib/db/user'
+import { createAuditLog } from '@/lib/db/audit'
 
-// Determine environment-specific settings
-const isDev = process.env.NODE_ENV === 'development';
-const cookieDomain = isDev ? '.sharpsighted.local' : '.sharpsighted.studio';
+const isDev = process.env.NODE_ENV === 'development'
+const cookieDomain = isDev ? '.sharpsighted.local' : '.sharpsighted.studio'
+
+const hasGoogle =
+    !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET
+
+const hasDiscord =
+    !!process.env.DISCORD_CLIENT_ID && !!process.env.DISCORD_CLIENT_SECRET
 
 export const authConfig: NextAuthConfig = {
     adapter: MongoDBAdapter(clientPromise) as any,
 
     providers: [
-        // Email magic link provider
-        EmailProvider({
+        NodemailerProvider({
             server: {
                 host: process.env.EMAIL_SERVER_HOST,
                 port: process.env.EMAIL_SERVER_PORT ? Number(process.env.EMAIL_SERVER_PORT) : undefined,
@@ -26,44 +31,54 @@ export const authConfig: NextAuthConfig = {
             },
             from: process.env.EMAIL_FROM || 'no-reply@sharpsighted.local',
 
-            // In development, log the magic link to console
             ...(isDev && {
                 sendVerificationRequest: async ({ identifier: email, url }) => {
-                    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                    console.log('📧 MAGIC LINK EMAIL');
-                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                    console.log(`To: ${email}`);
-                    console.log(`\n🔗 Click here to sign in:\n${url}\n`);
-                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+                    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+                    console.log('📧 MAGIC LINK EMAIL')
+                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+                    console.log(`To: ${email}`)
+                    console.log(`\n🔗 Click here to sign in:\n${url}\n`)
+                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
                 },
             }),
         }),
 
-        // Google OAuth provider
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-            authorization: {
-                params: {
-                    prompt: 'consent',
-                    access_type: 'offline',
-                    response_type: 'code',
-                },
-            },
-        }),
-    ],
+        ...(hasGoogle
+            ? [
+                GoogleProvider({
+                    clientId: process.env.GOOGLE_CLIENT_ID!,
+                    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+                    authorization: {
+                        params: {
+                            prompt: 'consent',
+                            access_type: 'offline',
+                            response_type: 'code',
+                        },
+                    },
+                }),
+            ]
+            : []),
 
-    // Database-backed sessions
+        ...(hasDiscord
+            ? [
+                DiscordProvider({
+                    clientId: process.env.DISCORD_CLIENT_ID!,
+                    clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+                }),
+            ]
+            : []),
+    ] as NextAuthConfig['providers'],
+
+    // ✅ MUST be JWT if you want Edge middleware to work with getToken()
     session: {
-        strategy: 'database',
-        maxAge: 30 * 24 * 60 * 60, // 30 days
-        updateAge: 24 * 60 * 60, // 24 hours
+        strategy: 'jwt',
+        maxAge: 30 * 24 * 60 * 60,
+        updateAge: 24 * 60 * 60,
     },
 
-    // Cookie configuration for cross-subdomain support
     cookies: {
         sessionToken: {
-            name: isDev ? `next-auth.session-token` : `__Secure-next-auth.session-token`,
+            name: isDev ? 'next-auth.session-token' : '__Secure-next-auth.session-token',
             options: {
                 httpOnly: true,
                 sameSite: 'lax',
@@ -73,7 +88,7 @@ export const authConfig: NextAuthConfig = {
             },
         },
         callbackUrl: {
-            name: isDev ? `next-auth.callback-url` : `__Secure-next-auth.callback-url`,
+            name: isDev ? 'next-auth.callback-url' : '__Secure-next-auth.callback-url',
             options: {
                 httpOnly: true,
                 sameSite: 'lax',
@@ -83,17 +98,13 @@ export const authConfig: NextAuthConfig = {
             },
         },
         csrfToken: {
-            name: isDev ? `next-auth.csrf-token` : `__Host-next-auth.csrf-token`,
+            name: isDev ? 'next-auth.csrf-token' : '__Host-next-auth.csrf-token',
             options: {
                 httpOnly: true,
                 sameSite: 'lax',
                 path: '/',
-                // IMPORTANT:
-                // - Do NOT set domain for csrf in production if using __Host-
-                // - Keep secure true in production
-                ...(isDev
-                    ? { secure: false, domain: cookieDomain }
-                    : { secure: true }),
+                // __Host- cookies must NOT set domain in prod
+                ...(isDev ? { secure: false, domain: cookieDomain } : { secure: true }),
             },
         },
     },
@@ -101,61 +112,94 @@ export const authConfig: NextAuthConfig = {
     pages: {
         signIn: '/login',
         verifyRequest: '/verify',
-        error: '/login', // Redirect auth errors to login
+        error: '/login',
     },
 
     callbacks: {
-        async signIn({ user, account }) {
+        async signIn({ user, account, profile }) {
             try {
                 if (user?.id && account) {
+                    // Capture avatar image from OAuth provider
+                    let image: string | null = null
+
+                    if (account.provider === 'google' && (profile as any)?.picture) {
+                        // Google provides a direct URL
+                        image = (profile as any).picture
+                    } else if (account.provider === 'discord' && (profile as any)?.avatar) {
+                        // Discord requires constructing the URL from user id + avatar hash
+                        const discordId = (profile as any).id
+                        const avatarHash = (profile as any).avatar
+                        image = `https://cdn.discordapp.com/avatars/${discordId}/${avatarHash}.png`
+                    }
+
+                    // Update user image if we got one from the provider
+                    if (image && user.id) {
+                        await updateUserImage(user.id, image)
+                    }
+
+                    let action = 'LOGIN_EMAIL'
+                    if (account.provider === 'google') action = 'LOGIN_GOOGLE'
+                    if (account.provider === 'discord') action = 'LOGIN_DISCORD'
+
                     await createAuditLog({
                         actorUserId: user.id,
                         actorRole: 'user',
-                        action: account.provider === 'google' ? 'LOGIN_GOOGLE' : 'LOGIN_EMAIL',
+                        action,
                         entityType: 'user',
                         entityId: user.id,
-                        metadata: {
-                            provider: account.provider,
-                        },
+                        metadata: { provider: account.provider },
                     })
                 }
             } catch (e) {
-                console.error("[auth] signIn side-effect failed", e)
-                // never deny login for audit failures
+                console.error('[auth] signIn side-effect failed', e)
             }
             return true
         },
 
-        async session({ session, user }) {
+        // ✅ Put custom claims into the JWT so Edge middleware can read them
+        // Only query DB on sign-in or explicit update for performance
+        async jwt({ token, user, trigger }) {
             try {
-                if (user?.id) {
-                    const userData = await getUserById(user.id)
-                    if (userData) {
-                        session.user.id = user.id
-                        session.user.role = userData.role
-                        session.user.displayName = userData.displayName
-                        session.user.onboardingComplete = userData.onboarding.isComplete
-                    }
-                }
-            } catch (e) {
-                console.error("[auth] session enrichment failed", e)
-                // return session anyway
-            }
-            return session
-        }
-    },
+                // Only fetch fresh user data on sign-in or explicit update
+                if (trigger === 'signIn' || trigger === 'update' || !token.id) {
+                    const userId = (user as any)?.id ?? (token as any)?.id
+                    if (!userId) return token
 
-    events: {
-        async createUser({ user }) {
-            console.log('✅ New user created:', user.email);
+                    const userData = await getUserById(String(userId))
+                    if (!userData) return token
+
+                        ; (token as any).id = String(userData._id)
+                        ; (token as any).role = userData.role
+                        ; (token as any).displayName = userData.displayName ?? null
+                        ; (token as any).onboardingComplete = userData.onboarding?.isComplete ?? false
+                        ; (token as any).image = userData.image ?? null
+                }
+
+                // Otherwise, return cached token (no DB query)
+                return token
+            } catch (e) {
+                console.error('[auth] jwt enrichment failed', e)
+                return token
+            }
         },
 
-        async linkAccount({ user, account }) {
-            console.log(`✅ Account linked: ${account.provider} → ${user.email}`);
+        async session({ session, token }) {
+            try {
+                if (session.user) {
+                    session.user.id = (token as any)?.id
+                    session.user.role = (token as any)?.role
+                    session.user.displayName = (token as any)?.displayName
+                    session.user.onboardingComplete = (token as any)?.onboardingComplete ?? false
+                    session.user.image = (token as any)?.image ?? null
+                }
+            } catch (e) {
+                console.error('[auth] session mapping failed', e)
+            }
+            return session
         },
     },
 
     debug: isDev,
-};
+}
 
-export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig)

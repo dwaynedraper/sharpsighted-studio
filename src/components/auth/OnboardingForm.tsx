@@ -67,12 +67,14 @@ export function OnboardingForm() {
                 return;
             }
 
-            // Update the session
-            await update();
+            // Update the session - force JWT refresh by passing data
+            await update({ onboarding: true })
 
-            // Redirect to home
-            router.push('/');
-            router.refresh();
+            // Redirect to home, or if admin, redirect to dashboard
+            const role = session?.user?.role
+            const landing = role === 'admin' || role === 'superAdmin' ? '/dashboard' : '/'
+            router.push(landing)
+            router.refresh()
         } catch (err) {
             setError('An error occurred. Please try again.');
         } finally {
@@ -123,11 +125,11 @@ export function OnboardingForm() {
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         required
-                        minLength={2}
-                        maxLength={30}
+                        minLength={3}
+                        maxLength={20}
                         className={`w-full px-4 py-3 bg-neutral-100 dark:bg-neutral-800 border rounded focus:outline-none focus:ring-2 focus:ring-[var(--accent)] ${displayNameError
-                                ? 'border-red-500 dark:border-red-500'
-                                : 'border-neutral-300 dark:border-neutral-700'
+                            ? 'border-red-500 dark:border-red-500'
+                            : 'border-neutral-300 dark:border-neutral-700'
                             }`}
                         placeholder="Choose a unique display name"
                         disabled={isSubmitting}

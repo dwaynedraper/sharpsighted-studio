@@ -51,7 +51,7 @@ export function AccentPicker() {
                             role="menu"
                             aria-label="Accent color options"
                         >
-                            <div className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-4">
+                            <div className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-900 dark:text-neutral-100 mb-4">
                                 Select Accent Color
                             </div>
 
@@ -80,7 +80,7 @@ export function AccentPicker() {
                                                 className="w-3 h-3 rounded-full shrink-0 shadow-sm"
                                                 style={{ backgroundColor: color.value }}
                                             />
-                                            <span className={`text-[9px] font-mono font-bold uppercase leading-tight whitespace-pre-line transition-colors ${isSelected ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'
+                                            <span className={`text-[9px] font-mono font-bold uppercase leading-tight whitespace-pre-line transition-colors text-neutral-900 dark:text-neutral-100 ${isSelected ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'
                                                 }`}>
                                                 {displayName}
                                             </span>
@@ -89,7 +89,7 @@ export function AccentPicker() {
                                 })}
                             </div>
 
-                            <div className="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-800 text-[10px] text-center font-mono text-neutral-400 dark:text-neutral-500 uppercase">
+                            <div className="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-800 text-[10px] text-center font-mono text-neutral-600 dark:text-neutral-400 uppercase">
                                 Affects Focus Rings & Highlights
                             </div>
                         </motion.div>

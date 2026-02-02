@@ -10,6 +10,7 @@ export interface User {
     displayName: string | null;
     displayNameLower: string | null;
     displayNameChangedAt: Date | null;
+    image: string | null;
     role: 'user' | 'admin' | 'superAdmin';
     status: {
         isActive: boolean;
@@ -23,6 +24,10 @@ export interface User {
     preferences: {
         theme: 'light' | 'dark' | 'system';
         accent: string;
+    };
+    rosStats?: {
+        ballotsCast: number;
+        lastBallotAt: Date | null;
     };
     createdAt: Date;
     updatedAt: Date;
@@ -126,6 +131,7 @@ export async function createUser(email: string, emailVerified: boolean = false):
         displayName: null,
         displayNameLower: null,
         displayNameChangedAt: null,
+        image: null,
         role: 'user',
         status: {
             isActive: true,
@@ -150,4 +156,106 @@ export async function createUser(email: string, emailVerified: boolean = false):
         ...newUser,
         _id: result.insertedId,
     };
+}
+
+/**
+ * Update user's avatar image URL
+ */
+export async function updateUserImage(userId: string, imageUrl: string): Promise<void> {
+    const db = await getDb();
+    const now = new Date();
+
+    await db.collection('users').updateOne(
+        { _id: new ObjectId(userId) },
+        {
+            $set: {
+                image: imageUrl,
+                updatedAt: now,
+            },
+        }
+    );
+}
+
+/**
+ * Update user role (superAdmin only)
+ */
+export async function updateUserRole(
+    userId: string,
+    newRole: 'user' | 'admin' | 'superAdmin',
+    actorUserId: string,
+    actorRole: 'user' | 'admin' | 'superAdmin'
+): Promise<void> {
+    const db = await getDb();
+
+    // Get the user to check current role
+    const user = await getUserById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const oldRole = user.role;
+    if (oldRole === newRole) {
+        throw new Error('User already has this role');
+    }
+
+    const now = new Date();
+
+    await db.collection('users').updateOne(
+        { _id: new ObjectId(userId) },
+        {
+            $set: {
+                role: newRole,
+                updatedAt: now,
+            },
+        }
+    );
+
+    // Log ADMIN_CREATED if promoting to admin/superAdmin from user
+    if (oldRole === 'user' && (newRole === 'admin' || newRole === 'superAdmin')) {
+        await createAuditLog({
+            actorUserId,
+            actorRole,
+            action: 'ADMIN_CREATED',
+            entityType: 'user',
+            entityId: userId,
+            metadata: { oldRole, newRole, targetEmail: user.email },
+        });
+    }
+
+    // Always log ROLE_CHANGED
+    await createAuditLog({
+        actorUserId,
+        actorRole,
+        action: 'ROLE_CHANGED',
+        entityType: 'user',
+        entityId: userId,
+        metadata: { oldRole, newRole, targetEmail: user.email },
+    });
+}
+
+/**
+ * Get user's RoS stats (for eligibility checks)
+ */
+export async function getRosStats(userId: string): Promise<{ ballotsCast: number; lastBallotAt: Date | null }> {
+    const user = await getUserById(userId);
+    return user?.rosStats ?? { ballotsCast: 0, lastBallotAt: null };
+}
+
+/**
+ * Increment user's RoS ballots cast after voting
+ */
+export async function incrementRosBallotsCast(userId: string): Promise<void> {
+    const db = await getDb();
+    const now = new Date();
+
+    await db.collection('users').updateOne(
+        { _id: new ObjectId(userId) },
+        {
+            $inc: { 'rosStats.ballotsCast': 1 },
+            $set: {
+                'rosStats.lastBallotAt': now,
+                updatedAt: now,
+            },
+        }
+    );
 }

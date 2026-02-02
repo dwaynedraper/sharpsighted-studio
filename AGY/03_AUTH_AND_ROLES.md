@@ -7,9 +7,9 @@ If an auth-related implementation conflicts with this doc, stop and ask for a de
 - Use Auth.js (NextAuth v5) with MongoDB adapter.
 - Providers:
   - Email magic link (required)
-  - Google OAuth (required)
-- Credentials password login is optional and not required for launch.
-  - If credentials are not used, do not implement forgot/reset password routes.
+  - Google OAuth (required in staging + production, optional in local dev)
+  - Discord OAuth (optional, for account linking and avatar retrieval)
+  - Local development: email magic link only (output to console)
 
 ## 2) Subdomain session sharing
 Goal: a user signs in on either subdomain and is authenticated on both.
@@ -30,6 +30,16 @@ Rules:
 - Authorized redirect URIs must include:
   - `https://sharpsighted.studio/api/auth/callback/google`
   - `https://ros.sharpsighted.studio/api/auth/callback/google`
+
+## 3b) Discord OAuth configuration requirements
+- Discord Developer Portal OAuth2 settings must include:
+  - Redirect URIs:
+    - `https://sharpsighted.studio/api/auth/callback/discord`
+    - `https://ros.sharpsighted.studio/api/auth/callback/discord`
+    - `http://localhost:3001/api/auth/callback/discord` (local dev only)
+  - Note: Discord does NOT allow custom local domains (e.g., sharpsighted.local)
+- Scopes requested automatically by NextAuth: `identify`, `email`
+- Avatar URL stored in user.image from Discord CDN
 
 ## 4) Email verification
 - Email magic link is the primary verification mechanism.
@@ -105,6 +115,7 @@ Use both:
 
 Rules:
 - All admin routes must be protected before render.
+- Admin routes begin with `/dashboard`
 - All vote submission endpoints must validate:
   - authenticated
   - onboarding complete
@@ -140,6 +151,7 @@ Log these events at minimum:
 - `ONBOARDING_COMPLETED`
 - `LOGIN_EMAIL`
 - `LOGIN_GOOGLE`
+- `LOGIN_DISCORD`
 
 Audit log must:
 - be append-only

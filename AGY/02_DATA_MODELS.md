@@ -1,6 +1,6 @@
 # MongoDB Data Models and Indexes
 
-This document defines the MongoDB collections, fields, relationships, and required indexes.  
+This document defines the MongoDB collections, fields, relationships, and required indexes.
 If a feature needs data not listed here, update this file before implementing.
 
 ## 0) Global conventions
@@ -36,6 +36,9 @@ Purpose: canonical user identity, onboarding status, roles, preferences.
 - `preferences`
   - `theme` enum: `light` | `dark` | `system` (default `system`)
   - `accent` string (hex or token id)
+- `rosStats` (optional, recommended for gating performance)
+  - `ballotsCast` number (default 0)
+  - `lastBallotAt` Date | null
 - `createdAt` Date
 - `updatedAt` Date
 
@@ -77,8 +80,8 @@ Purpose: store OAuth provider links and ensure merge-by-email without duplicates
 - Never create duplicate users for the same verified email.
 - Link providers only for verified emails.
 
-## 3) sessions (if using Auth.js adapter)
-Purpose: active session tracking (adapter-managed).
+## 3) sessions (adapter-managed)
+Purpose: sessions when using database strategy. If using JWT strategy, adapter may not rely on this.
 
 ### Indexes
 - `{ userId: 1 }`
@@ -112,7 +115,7 @@ Purpose: shared blog system for both SSS and RoS tagged content. Canonical route
 - `{ tags: 1, status: 1, publishedAt: -1 }`
 
 ## 5) episodes
-Purpose: first-class RoS “challenge”/episode narrative and archive.
+Purpose: first-class RoS episode archive and evergreen “final result” page.
 
 ### Document
 - `_id` ObjectId
@@ -123,6 +126,24 @@ Purpose: first-class RoS “challenge”/episode narrative and archive.
 - `contentMarkdown` string (required)
 - `status` enum: `draft` | `published` | `archived`
 - `isCurrent` boolean (default false)
+
+- `ros` (structured RoS metadata + outcomes)
+  - `operationTitle` string | null
+  - `pollUrl` string | null
+  - `hook` string | null
+
+  - `paper`
+    - `paperName` string | null
+    - `identityMarkdown` string | null
+    - `nightmareMarkdown` string | null
+    - `handicapMarkdown` string | null
+
+  - `results`
+    - `winningPaperOptionId` ObjectId | null (ref voteOptions._id)
+    - `winningBenchmarkOptionId` ObjectId | null (ref voteOptions._id)
+    - `winningTrapOptionId` ObjectId | null (ref voteOptions._id)
+    - `winningRidiculousOptionId` ObjectId | null (ref voteOptions._id)
+
 - `coverImage`
   - `cloudinaryPublicId` string | null
   - `alt` string | null
@@ -137,32 +158,47 @@ Purpose: first-class RoS “challenge”/episode narrative and archive.
 - `{ status: 1, publishedAt: -1 }`
 - `{ isCurrent: 1 }` (ensure only one current via application rule)
 
-### Rule
+### Rules
 - Enforce only one `isCurrent: true` at a time in app logic.
 
 ## 6) votes
-Purpose: define a vote container. Single-choice site-wide. May be scheduled or manually closed.
+Purpose: define a vote container. Single-choice. Supports standard voting and “collect then vote” for Ridiculous.
 
 ### Document
 - `_id` ObjectId
 - `type` enum:
   - `paperSelection`
-  - `challengeRubricA`
-  - `challengeRubricB`
-  - `challengeRubricC`
+  - `benchmark`
+  - `trap`
+  - `ridiculous`
   - `other`
 - `title` string (required)
 - `slug` string (required, unique)
 - `descriptionMarkdown` string | null
 - `episodeId` ObjectId | null (ref episodes._id)
-- `status` enum: `draft` | `published` | `closed` | `archived`
+
+- `status` enum: `draft` | `published` | `archived`
+  - `published` means visible on `/voting`
+- `phase` enum: `collecting` | `voting` | `closed`
+  - `collecting` accepts user-submitted options (ridiculous only)
+  - `voting` accepts ballots
+  - `closed` means results can be finalized
+
 - `visibility`
   - `canView` enum: `public` (default public)
-  - `canVote` enum: `authenticated` (always requires auth + onboarding)
+  - `canVote` enum: `authenticated` (requires auth + onboarding)
+
+- `constraints` (optional per vote)
+  - `allowUserOptions` boolean (default false)
+  - `maxUserSubmissions` number | null
+    - For Ridiculous: 5
+  - `resultsHiddenUntilVoted` boolean (default true)
+
 - `timing`
   - `opensAt` Date | null
   - `endsAt` Date | null
   - `manualCloseEnabled` boolean (default true)
+
 - `publishedByUserId` ObjectId | null
 - `publishedAt` Date | null
 - `closedByUserId` ObjectId | null
@@ -173,8 +209,8 @@ Purpose: define a vote container. Single-choice site-wide. May be scheduled or m
 
 ### Indexes
 - Unique: `{ slug: 1 }`
-- `{ status: 1, "timing.opensAt": 1, "timing.endsAt": 1 }`
-- `{ episodeId: 1, status: 1 }`
+- `{ status: 1, phase: 1, "timing.opensAt": 1, "timing.endsAt": 1 }`
+- `{ episodeId: 1, status: 1, phase: 1 }`
 
 ### Rules
 - Single choice only.
@@ -182,22 +218,40 @@ Purpose: define a vote container. Single-choice site-wide. May be scheduled or m
 - Results visibility:
   - Votes are visible to everyone.
   - Results are hidden until the user has voted.
+- Phase enforcement:
+  - Ballots only allowed when `phase = voting`.
+  - User-submitted options only allowed when `phase = collecting` AND `constraints.allowUserOptions = true`.
 
 ## 7) voteOptions
-Purpose: the selectable options for a vote.
+Purpose: selectable options for a vote, including admin-created challenges and user-submitted Ridiculous entries.
 
 ### Document
 - `_id` ObjectId
 - `voteId` ObjectId (ref votes._id)
 - `label` string (required)
 - `description` string | null
+- `trap` string | null
+  - Only used for `vote.type = trap`
+  - This is the “trap” rule text shown under the challenge
+
 - `image`
   - `cloudinaryPublicId` string | null
   - `alt` string | null
+
 - `createdByUserId` ObjectId | null
-  - For Rubric C custom entries, this is the submitting user.
+  - For Ridiculous user entries, this is the submitting user.
 - `attributionDisplayName` string | null
   - Snapshot of the user display name at time of submission for attribution.
+
+- `eligibility` (optional gating per option)
+  - `minRosBallotsCast` number | null
+    - For nightmare-only choices: 3
+  - `rolesAllowed` array of `user` | `admin` | `superAdmin` | null
+
+- `flags`
+  - `isNightmare` boolean (default false)
+  - `isUserSubmitted` boolean (default false)
+
 - `order` number | null
 - `isActive` boolean (default true)
 - `createdAt` Date
@@ -206,16 +260,22 @@ Purpose: the selectable options for a vote.
 ### Indexes
 - `{ voteId: 1, order: 1 }`
 - `{ voteId: 1, isActive: 1 }`
+- `{ voteId: 1, "flags.isUserSubmitted": 1 }`
 
-### Rules for Rubric C
-- Only allow custom entry creation if:
-  - vote type is `challengeRubricC`
-  - vote is `published`
-  - submission count for that vote is < 5
-  - user is authenticated and onboarding complete
-- Custom entry length:
-  - hard cap 120 characters server-side
-  - enforce visually client-side too
+### Rules
+- Nightmares:
+  - `flags.isNightmare = true` options may require `eligibility.minRosBallotsCast = 3`.
+- Ridiculous submission:
+  - Only allow option creation if:
+    - vote type is `ridiculous`
+    - vote status is `published`
+    - vote phase is `collecting`
+    - vote `constraints.allowUserOptions = true`
+    - submission count for that vote is < `constraints.maxUserSubmissions` (5)
+    - user is authenticated and onboarding complete
+  - Custom entry length:
+    - hard cap 120 characters server-side
+    - enforce visually client-side too
 
 ## 8) ballots
 Purpose: record a user’s single-choice vote. Must be one per user per vote.
@@ -234,6 +294,8 @@ Purpose: record a user’s single-choice vote. Must be one per user per vote.
 
 ### Rules
 - Ballots cannot be updated. Create once, immutable.
+- Eligibility enforcement:
+  - When creating a ballot, validate that the chosen `voteOption.eligibility` is satisfied for that user.
 
 ## 9) voteResults (optional materialized results)
 Purpose: cache counts after close or for fast reads.
@@ -259,7 +321,14 @@ Purpose: immutable admin and super admin actions for safety and debugging.
 - `actorUserId` ObjectId
 - `actorRole` string
 - `action` string
-  - examples: `ADMIN_CREATED`, `ADMIN_SUSPENDED`, `VOTE_PUBLISHED`, `VOTE_CLOSED`, `DISPLAYNAME_CHANGED`
+  - examples:
+    - `ADMIN_CREATED`
+    - `ROLE_CHANGED`
+    - `VOTE_PUBLISHED`
+    - `VOTE_PHASE_CHANGED`
+    - `VOTE_CLOSED`
+    - `EPISODE_PUBLISHED`
+    - `DISPLAYNAME_CHANGED`
 - `entityType` string
 - `entityId` ObjectId | string
 - `metadata` object (small, no secrets)
