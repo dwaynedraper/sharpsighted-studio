@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 
 export function MainHomePage() {
+    const rosUrl = process.env.NEXT_PUBLIC_ROS_URL || 'https://ros.sharpsighted.studio';
+
     return (
         <main className="min-h-screen pb-16 font-mono text-foreground transition-colors duration-300 selection:bg-[#38bdf8] selection:text-background">
             {/* HERO SECTION */}
@@ -41,18 +43,21 @@ export function MainHomePage() {
 
                     <div className="flex flex-col md:flex-row items-center justify-center gap-6 mt-8">
                         <Link
-                            href="/tutorials"
-                            className="group relative px-8 py-4 bg-[#38bdf8] text-black font-bold uppercase tracking-widest overflow-hidden hover:scale-105 transition-transform"
+                            href={rosUrl}
+                            className="group relative px-8 py-4 bg-[#38bdf8] text-black font-bold uppercase overflow-hidden hover:scale-105 transition-transform text-center"
                         >
-                            <span className="relative z-10 flex items-center gap-2">
-                                Start Learning <ArrowRight className="w-4 h-4" />
+                            <span className="relative z-10 flex flex-col items-center gap-1">
+                                <span className="text-xs tracking-widest opacity-70">Watch</span>
+                                <span className="flex items-center gap-2 tracking-wider">
+                                    Ripped or Stamped <ArrowRight className="w-4 h-4" />
+                                </span>
                             </span>
                         </Link>
                         <Link
-                            href="/blog"
+                            href="/signup"
                             className="px-8 py-4 border border-white/30 text-white font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors"
                         >
-                            Read Transmission
+                            Sign Up
                         </Link>
                     </div>
                 </div>

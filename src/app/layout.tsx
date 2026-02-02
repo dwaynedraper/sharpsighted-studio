@@ -8,6 +8,7 @@ import { AuthProvider } from "@/components/providers/AuthProvider";
 import { getThemeFromHeaders, getAccentFromHeaders } from "@/lib/theme/cookie-utils";
 import { MainShell } from "@/components/main/MainShell";
 import { RosShell } from "@/components/ros/RosShell";
+import { SiteFooter } from "@/components/shared/SiteFooter";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -73,6 +74,7 @@ export default async function RootLayout({
           <ThemeProvider initialTheme={initialTheme}>
             <AccentProvider initialAccent={initialAccent}>
               <Shell>{children}</Shell>
+              <SiteFooter />
             </AccentProvider>
           </ThemeProvider>
         </AuthProvider>
