@@ -39,15 +39,18 @@
   --glow-pink-strong: 0 0 30px rgba(236, 72, 153, 0.7);
   --glow-mixed: 0 0 25px rgba(56, 189, 248, 0.4), 0 0 50px rgba(236, 72, 153, 0.2);
 
-  // Blueprint (RoS shell)
-  --blueprint-bg: #0a0a0f;
-  --blueprint-line: #1a1a2e;
-  --blueprint-text: #e5e7eb;
-  --blueprint-accent: #3b82f6;
+  // Blueprint (RoS shell) - Light mode defaults
+  --blueprint-bg: #f8f6f1;
+  --blueprint-line: #d4cfc4;
+  --blueprint-text: #1a1a2e;
+  --blueprint-accent: #2563eb;
   --blueprint-danger: #dc2626;
-  --blueprint-success: #10b981;
-  --blueprint-grid: linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+  --blueprint-success: #059669;
+  --blueprint-card-bg: #ffffff;
+  --blueprint-card-border: rgba(180, 170, 150, 0.4);
+  --blueprint-card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --blueprint-grid: linear-gradient(rgba(37, 99, 235, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.08) 1px, transparent 1px);
 
   // Typography
   --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -81,6 +84,19 @@
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5);
+
+  // Blueprint (RoS shell) - Dark mode overrides
+  --blueprint-bg: #0a0a0f;
+  --blueprint-line: #1a1a2e;
+  --blueprint-text: #e5e7eb;
+  --blueprint-accent: #3b82f6;
+  --blueprint-danger: #dc2626;
+  --blueprint-success: #10b981;
+  --blueprint-card-bg: #0a0a0f;
+  --blueprint-card-border: rgba(26, 26, 46, 0.3);
+  --blueprint-card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --blueprint-grid: linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
 }
 
 // ==================== TAILWIND THEME ====================
@@ -302,7 +318,7 @@ select {
 
 // RoS Border Styles
 .blueprint-border {
-  border: 1px solid rgba(26, 26, 46, 0.5) !important;
+  border: 1px solid var(--blueprint-line) !important;
 
   &-accent {
     border: 1px solid var(--accent) !important;
@@ -311,15 +327,15 @@ select {
 
 // RoS Card
 .blueprint-card {
-  border: 1px solid rgba(26, 26, 46, 0.3) !important;
-  background: var(--blueprint-bg);
+  border: 1px solid var(--blueprint-card-border) !important;
+  background: var(--blueprint-card-bg);
   border-radius: 6px !important;
   transition: all 200ms ease-out;
 
   &:hover {
     border-color: var(--accent) !important;
     box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 30%, transparent),
-      0 4px 12px rgba(0, 0, 0, 0.5) !important;
+      var(--blueprint-card-hover-shadow) !important;
     transform: translateY(-2px);
   }
 }

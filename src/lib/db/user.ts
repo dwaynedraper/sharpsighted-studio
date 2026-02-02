@@ -10,6 +10,7 @@ export interface User {
     displayName: string | null;
     displayNameLower: string | null;
     displayNameChangedAt: Date | null;
+    image: string | null;
     role: 'user' | 'admin' | 'superAdmin';
     status: {
         isActive: boolean;
@@ -130,6 +131,7 @@ export async function createUser(email: string, emailVerified: boolean = false):
         displayName: null,
         displayNameLower: null,
         displayNameChangedAt: null,
+        image: null,
         role: 'user',
         status: {
             isActive: true,
@@ -154,6 +156,24 @@ export async function createUser(email: string, emailVerified: boolean = false):
         ...newUser,
         _id: result.insertedId,
     };
+}
+
+/**
+ * Update user's avatar image URL
+ */
+export async function updateUserImage(userId: string, imageUrl: string): Promise<void> {
+    const db = await getDb();
+    const now = new Date();
+
+    await db.collection('users').updateOne(
+        { _id: new ObjectId(userId) },
+        {
+            $set: {
+                image: imageUrl,
+                updatedAt: now,
+            },
+        }
+    );
 }
 
 /**

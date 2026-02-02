@@ -1,9 +1,10 @@
 import NextAuth, { type NextAuthConfig } from 'next-auth'
 import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import GoogleProvider from 'next-auth/providers/google'
+import DiscordProvider from 'next-auth/providers/discord'
 import NodemailerProvider from 'next-auth/providers/nodemailer'
 import clientPromise from '@/lib/db/mongodb'
-import { getUserById } from '@/lib/db/user'
+import { getUserById, updateUserImage } from '@/lib/db/user'
 import { createAuditLog } from '@/lib/db/audit'
 
 const isDev = process.env.NODE_ENV === 'development'
@@ -11,6 +12,9 @@ const cookieDomain = isDev ? '.sharpsighted.local' : '.sharpsighted.studio'
 
 const hasGoogle =
     !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET
+
+const hasDiscord =
+    !!process.env.DISCORD_CLIENT_ID && !!process.env.DISCORD_CLIENT_SECRET
 
 export const authConfig: NextAuthConfig = {
     adapter: MongoDBAdapter(clientPromise) as any,
@@ -51,6 +55,15 @@ export const authConfig: NextAuthConfig = {
                             response_type: 'code',
                         },
                     },
+                }),
+            ]
+            : []),
+
+        ...(hasDiscord
+            ? [
+                DiscordProvider({
+                    clientId: process.env.DISCORD_CLIENT_ID!,
+                    clientSecret: process.env.DISCORD_CLIENT_SECRET!,
                 }),
             ]
             : []),
@@ -103,13 +116,35 @@ export const authConfig: NextAuthConfig = {
     },
 
     callbacks: {
-        async signIn({ user, account }) {
+        async signIn({ user, account, profile }) {
             try {
                 if (user?.id && account) {
+                    // Capture avatar image from OAuth provider
+                    let image: string | null = null
+
+                    if (account.provider === 'google' && (profile as any)?.picture) {
+                        // Google provides a direct URL
+                        image = (profile as any).picture
+                    } else if (account.provider === 'discord' && (profile as any)?.avatar) {
+                        // Discord requires constructing the URL from user id + avatar hash
+                        const discordId = (profile as any).id
+                        const avatarHash = (profile as any).avatar
+                        image = `https://cdn.discordapp.com/avatars/${discordId}/${avatarHash}.png`
+                    }
+
+                    // Update user image if we got one from the provider
+                    if (image && user.id) {
+                        await updateUserImage(user.id, image)
+                    }
+
+                    let action = 'LOGIN_EMAIL'
+                    if (account.provider === 'google') action = 'LOGIN_GOOGLE'
+                    if (account.provider === 'discord') action = 'LOGIN_DISCORD'
+
                     await createAuditLog({
                         actorUserId: user.id,
                         actorRole: 'user',
-                        action: account.provider === 'google' ? 'LOGIN_GOOGLE' : 'LOGIN_EMAIL',
+                        action,
                         entityType: 'user',
                         entityId: user.id,
                         metadata: { provider: account.provider },
@@ -137,6 +172,7 @@ export const authConfig: NextAuthConfig = {
                         ; (token as any).role = userData.role
                         ; (token as any).displayName = userData.displayName ?? null
                         ; (token as any).onboardingComplete = userData.onboarding?.isComplete ?? false
+                        ; (token as any).image = userData.image ?? null
                 }
 
                 // Otherwise, return cached token (no DB query)
@@ -154,6 +190,7 @@ export const authConfig: NextAuthConfig = {
                     session.user.role = (token as any)?.role
                     session.user.displayName = (token as any)?.displayName
                     session.user.onboardingComplete = (token as any)?.onboardingComplete ?? false
+                    session.user.image = (token as any)?.image ?? null
                 }
             } catch (e) {
                 console.error('[auth] session mapping failed', e)
