@@ -83,8 +83,9 @@ export const authConfig: NextAuthConfig = {
                 httpOnly: true,
                 sameSite: 'lax',
                 path: '/',
-                domain: cookieDomain,
-                secure: !isDev,
+                // In dev, don't set domain - allows localhost and sharpsighted.local to work independently
+                // In prod, set domain for cross-subdomain sharing
+                ...(isDev ? { secure: false } : { domain: cookieDomain, secure: true }),
             },
         },
         callbackUrl: {
@@ -93,8 +94,7 @@ export const authConfig: NextAuthConfig = {
                 httpOnly: true,
                 sameSite: 'lax',
                 path: '/',
-                domain: cookieDomain,
-                secure: !isDev,
+                ...(isDev ? { secure: false } : { domain: cookieDomain, secure: true }),
             },
         },
         csrfToken: {
@@ -104,7 +104,7 @@ export const authConfig: NextAuthConfig = {
                 sameSite: 'lax',
                 path: '/',
                 // __Host- cookies must NOT set domain in prod
-                ...(isDev ? { secure: false, domain: cookieDomain } : { secure: true }),
+                ...(isDev ? { secure: false } : { secure: true }),
             },
         },
     },
